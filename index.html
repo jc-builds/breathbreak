@@ -16,6 +16,34 @@
     Your browser does not support the video tag.
   </video>
 
+  <main>
+    <section class="control-panel">
+        <h1>Breathbreak</h1>
+
+        <div class="controls">
+          <label>
+            Inhale (seconds):
+            <input type="number" id="inhale" min="1" value="4" />
+          </label>
+      
+          <label>
+            Exhale (seconds):
+            <input type="number" id="exhale" min="1" value="6" />
+          </label>
+      
+          <label>
+            Total Duration (minutes):
+            <input type="number" id="duration" min="1" value="5" />
+          </label>
+      
+          <button id="start">Start</button>
+          <button id="stop">Stop</button>
+        </div>
+      
+        <div id="status" class="status-message"></div>
+    </section>
+  </main>
+
 </body>
 
 </html>

@@ -77,3 +77,37 @@ body, html {
     font-size: 1.1rem;
     font-weight: 500;
   }
+
+  /* Hiding / Fading in the Control Panel */
+.control-panel {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.control-panel.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.session-view {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(32, 112, 169, 0.6); /* same ocean blue */
+  padding: 2rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 90%;
+  max-width: 400px;
+  color: white;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+

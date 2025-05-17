@@ -1,82 +1,150 @@
-//Creating variables based on the ID of the buttons / elements in the HTML
-const startBtn = document.getElementById('start'); 
-const stopBtn = document.getElementById('stop');
+// ========== Session State ==========
+let sessionActive = false;
+
+// ========== DOM Elements ==========
+const startBtn = document.getElementById('start');
+const sessionStopBtn = document.getElementById('session-stop');
+
+const inhaleInput = document.getElementById('inhale');
+const exhaleInput = document.getElementById('exhale');
+const durationInput = document.getElementById('duration');
+
 const breathCue = document.getElementById('breath-cue');
 const statusMsg = document.getElementById('status');
+const controlPanel = document.querySelector('.control-panel');
+const sessionView = document.getElementById('session-view');
 
-//Initialize variables for inhaleTime, exhaleTime, duration
+// ========== Timing State ==========
 let inhaleTime = 4;
 let exhaleTime = 6;
 let totalDuration = 5;
-let intervalID;
-let timeoutID;
 let sessionEndTime;
+let timeoutID;
+let idleTimeout;
+let statusInterval;
 
-// Create a function that runs when the "Start" button is clicked.
+// ========== Helpers ==========
+function getTimeRemaining() {
+  const msLeft = sessionEndTime - Date.now();
+  const seconds = Math.max(0, Math.floor(msLeft / 1000));
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+// ========== Breathwork Logic ==========
+
+// Starts the breathing session
 function startBreathwork() {
-  // Get the inhale duration (in seconds) from the user input
-  inhaleTime = parseInt(document.getElementById('inhale').value);
+  sessionActive = true;
 
-  // Get the exhale duration (in seconds) from the user input
-  exhaleTime = parseInt(document.getElementById('exhale').value);
+  inhaleTime = parseInt(inhaleInput.value);
+  exhaleTime = parseInt(exhaleInput.value);
+  totalDuration = parseInt(durationInput.value);
 
-  // Get the total session duration (in minutes) from the user input
-  totalDuration = parseInt(document.getElementById('duration').value);
-
-  // If any of the inputs aren't valid numbers, show an alert and stop the function
   if (isNaN(inhaleTime) || isNaN(exhaleTime) || isNaN(totalDuration)) {
     alert('Please enter valid numbers for all fields.');
+    sessionActive = false;
     return;
   }
 
-  // Calculate the exact end time of the session based on the current timestamp
-  // totalDuration (in minutes) is converted to milliseconds
   sessionEndTime = Date.now() + totalDuration * 60 * 1000;
 
-  // Disable the start button so the user can't restart mid-session
+  statusInterval = setInterval(() => {
+    statusMsg.textContent = `Keep Going – ${getTimeRemaining()}`;
+  }, 1000);
+
   startBtn.disabled = true;
 
-  // Enable the stop button so the user can cancel if they want
-  stopBtn.disabled = false;
+  controlPanel.classList.add('hidden');
+  sessionView.classList.remove('hidden');
+  statusMsg.textContent = 'Session in progress...';
 
-  // Show a message that the session is active
-  statusMsg.textContent = "Session in progress...";
-
-  // Kick off the first inhale/exhale cycle
   beginCycle();
 }
 
-
+// Ends the breathing session
 function stopBreathwork() {
+  sessionActive = false;
+
   clearTimeout(timeoutID);
-  clearInterval(intervalID);
-  breathCue.textContent = "Stopped";
-  statusMsg.textContent = "";
+  clearInterval(statusInterval);
+  document.body.classList.remove('inhale');
+
   startBtn.disabled = false;
-  stopBtn.disabled = true;
+
+  breathCue.textContent = 'Stopped';
+  statusMsg.textContent = '';
+
+  sessionView.classList.add('hidden');
+  controlPanel.classList.remove('hidden');
 }
 
+// Handles the inhale/exhale loop
 function beginCycle() {
   if (Date.now() >= sessionEndTime) {
     stopBreathwork();
-    breathCue.textContent = "Complete";
-    statusMsg.textContent = "Session complete.";
+    breathCue.textContent = 'Complete';
+    statusMsg.textContent = 'Session complete.';
     return;
   }
 
-  breathCue.textContent = "Inhale";
-  document.body.classList.add("inhale");
+  // Inhale Phase
+  let inhaleCountdown = inhaleTime;
+  breathCue.textContent = `Inhale: ${inhaleCountdown}`;
+  document.body.classList.add('inhale');
 
-  timeoutID = setTimeout(() => {
-    breathCue.textContent = "Exhale";
-    document.body.classList.remove("inhale");
+  const inhaleInterval = setInterval(() => {
+    inhaleCountdown--;
+    if (inhaleCountdown > 0) {
+      breathCue.textContent = `Inhale: ${inhaleCountdown}`;
+    } else {
+      clearInterval(inhaleInterval);
+      document.body.classList.remove('inhale');
 
-    timeoutID = setTimeout(() => {
-      beginCycle(); // Restart the cycle
-    }, exhaleTime * 1000);
+      // Exhale Phase
+      let exhaleCountdown = exhaleTime;
+      breathCue.textContent = `Exhale: ${exhaleCountdown}`;
 
-  }, inhaleTime * 1000);
+      const exhaleInterval = setInterval(() => {
+        exhaleCountdown--;
+        if (exhaleCountdown > 0) {
+          breathCue.textContent = `Exhale: ${exhaleCountdown}`;
+        } else {
+          clearInterval(exhaleInterval);
+          beginCycle(); // Continue loop
+        }
+      }, 1000);
+    }
+  }, 1000);
 }
 
+// ========== Idle Detection Logic ==========
+
+// Shows control panel only if session is not active
+function showControlPanel() {
+  if (sessionActive) {
+    sessionStopBtn.classList.remove('hidden'); // Show Stop button during session
+    return;
+  }
+
+  controlPanel.classList.add('visible');
+
+  clearTimeout(idleTimeout);
+  idleTimeout = setTimeout(() => {
+    controlPanel.classList.remove('visible');
+  }, 6000);
+}
+
+// ========== Event Listeners ==========
+
 startBtn.addEventListener('click', startBreathwork);
-stopBtn.addEventListener('click', stopBreathwork);
+sessionStopBtn.addEventListener('click', stopBreathwork);
+
+['mousemove', 'keydown', 'touchstart'].forEach(event => {
+  document.addEventListener(event, showControlPanel);
+});
+
+window.addEventListener('load', () => {
+  controlPanel.classList.remove('visible');
+});

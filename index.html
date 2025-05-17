@@ -36,15 +36,19 @@
             <input type="number" id="duration" min="1" value="5" />
           </label>
       
-          <button id="start">Start</button>
-          <button id="stop">Stop</button>
+          <button id="start">Begin</button>
         </div>
-      
-        <div id="status" class="status-message"></div>
-        <div id="breath-cue" class="breath-cue">Ready?</div>
     </section>
+
+    <!-- The Session View div will appear when the breath cycle is in progress. -->
+    <div id="session-view" class="session-view hidden">
+      <div id="status" class="status-message"></div>
+      <div id="breath-cue" class="breath-cue"></div> 
+      <button id="session-stop">Stop</button>
+    </div>
   </main>
 
+  <script src="script.js"></script>
 </body>
 
 </html>

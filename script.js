@@ -10,14 +10,15 @@ const exhaleInput = document.getElementById('exhale');
 const durationInput = document.getElementById('duration');
 
 const breathCue = document.getElementById('breath-cue');
-const statusMsg = document.getElementById('status');
 const controlPanel = document.querySelector('.control-panel');
 const sessionView = document.getElementById('session-view');
+const progressBar = document.getElementById('progress-bar');
 
 // ========== Timing State ==========
 let inhaleTime = 4;
 let exhaleTime = 6;
 let totalDuration = 5;
+let sessionStartTime;
 let sessionEndTime;
 let timeoutID;
 let idleTimeout;
@@ -32,9 +33,14 @@ function getTimeRemaining() {
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
 }
 
-// ========== Breathwork Logic ==========
+function updateProgressBar() {
+  const elapsed = Date.now() - sessionStartTime;
+  const total = totalDuration * 60 * 1000;
+  const progress = Math.min((elapsed / total) * 100, 100);
+  progressBar.style.width = `${progress}%`;
+}
 
-// Starts the breathing session
+// ========== Breathwork Logic ==========
 function startBreathwork() {
   sessionActive = true;
 
@@ -48,23 +54,19 @@ function startBreathwork() {
     return;
   }
 
-  sessionEndTime = Date.now() + totalDuration * 60 * 1000;
+  sessionStartTime = Date.now();
+  sessionEndTime = sessionStartTime + totalDuration * 60 * 1000;
 
-  statusInterval = setInterval(() => {
-    statusMsg.textContent = `${getTimeRemaining()}`;
-  }, 1000);
+  statusInterval = setInterval(updateProgressBar, 1000);
 
   startBtn.disabled = true;
-
   controlPanel.classList.add('hidden');
   sessionView.classList.remove('hidden');
-  //statusMsg.textContent = 'Session in progress...';
 
   beginCycle();
 }
 
-// Ends the breathing session
-function stopBreathwork() {
+function stopBreathwork(finalStatus = '', finalCue = 'Stopped') {
   sessionActive = false;
 
   clearTimeout(timeoutID);
@@ -73,19 +75,16 @@ function stopBreathwork() {
 
   startBtn.disabled = false;
 
-  breathCue.textContent = 'Stopped';
-  statusMsg.textContent = '';
+  breathCue.textContent = finalCue;
+  progressBar.style.width = '0%';
 
   sessionView.classList.add('hidden');
   controlPanel.classList.remove('hidden');
 }
 
-// Handles the inhale/exhale loop
 function beginCycle() {
   if (Date.now() >= sessionEndTime) {
-    stopBreathwork();
-    breathCue.textContent = 'Complete';
-    statusMsg.textContent = 'Session complete.';
+    stopBreathwork('', 'Complete');
     return;
   }
 
@@ -94,37 +93,36 @@ function beginCycle() {
   breathCue.textContent = `Inhale: ${inhaleCountdown}`;
   document.body.classList.add('inhale');
 
-  const inhaleInterval = setInterval(() => {
+  timeoutID = setInterval(() => {
     inhaleCountdown--;
     if (inhaleCountdown > 0) {
       breathCue.textContent = `Inhale: ${inhaleCountdown}`;
     } else {
-      clearInterval(inhaleInterval);
+      clearInterval(timeoutID);
       document.body.classList.remove('inhale');
 
       // Exhale Phase
       let exhaleCountdown = exhaleTime;
       breathCue.textContent = `Exhale: ${exhaleCountdown}`;
 
-      const exhaleInterval = setInterval(() => {
+      timeoutID = setInterval(() => {
         exhaleCountdown--;
         if (exhaleCountdown > 0) {
           breathCue.textContent = `Exhale: ${exhaleCountdown}`;
         } else {
-          clearInterval(exhaleInterval);
-          beginCycle(); // Continue loop
+          clearInterval(timeoutID);
+          beginCycle(); // Start the next inhale
         }
       }, 1000);
     }
   }, 1000);
 }
 
-// ========== Idle Detection Logic ==========
 
-// Shows control panel only if session is not active
+// ========== Idle Detection Logic ==========
 function showControlPanel() {
   if (sessionActive) {
-    sessionStopBtn.classList.remove('hidden'); // Show Stop button during session
+    sessionStopBtn.classList.remove('hidden');
     return;
   }
 
@@ -137,7 +135,6 @@ function showControlPanel() {
 }
 
 // ========== Event Listeners ==========
-
 startBtn.addEventListener('click', startBreathwork);
 sessionStopBtn.addEventListener('click', stopBreathwork);
 

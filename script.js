@@ -51,14 +51,14 @@ function startBreathwork() {
   sessionEndTime = Date.now() + totalDuration * 60 * 1000;
 
   statusInterval = setInterval(() => {
-    statusMsg.textContent = `Keep Going – ${getTimeRemaining()}`;
+    statusMsg.textContent = `${getTimeRemaining()}`;
   }, 1000);
 
   startBtn.disabled = true;
 
   controlPanel.classList.add('hidden');
   sessionView.classList.remove('hidden');
-  statusMsg.textContent = 'Session in progress...';
+  //statusMsg.textContent = 'Session in progress...';
 
   beginCycle();
 }

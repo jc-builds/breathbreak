@@ -27,7 +27,7 @@ body, html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(32, 112, 169, 0.6); /* custom ocean blue */
+    background-color: rgba(33, 151, 236, 0.867); /* custom ocean blue */
     padding: 2rem;
     border-radius: 12px;
     display: flex;
@@ -37,13 +37,16 @@ body, html {
     max-width: 400px;
     color: white;
     text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.5rem;
   }
   
   /* Input + Button Styling */
   .controls label {
     display: flex;
     flex-direction: column;
-    font-size: 1rem;
+    font-size: 1.25rem;
+    font-weight: bold;
     text-align: left;
     margin-bottom: 5px;
   }
@@ -62,14 +65,14 @@ body, html {
     border: none;
     border-radius: 6px;
     background-color: white;
-    color: rgba(32, 112, 169, 0.6);
+    color: rgba(0, 0, 0, 0.6);
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s ease;
   }
   
   button:hover {
-    background-color: #f0f0f0;
+    background-color: #d1d0d0;
   }
   
   .status-message {
@@ -95,7 +98,6 @@ body, html {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(32, 112, 169, 0.6); /* same ocean blue */
   padding: 2rem;
   border-radius: 12px;
   display: flex;
@@ -103,8 +105,12 @@ body, html {
   gap: 1rem;
   width: 90%;
   max-width: 400px;
-  color: white;
+  background-color: rgba(240, 255, 255, 0.494);
+  color: rgb(0, 0, 0);
   text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.5rem;
+  font-weight: bolder;
 }
 
 .hidden {
